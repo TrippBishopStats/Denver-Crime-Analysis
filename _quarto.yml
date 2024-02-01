@@ -8,10 +8,11 @@ website:
       - href: index.qmd
         text: Home
       - about.qmd
+      - data-prep.qmd
 
 format:
   html:
-    theme: cosmo
+    theme: cyborg
     css: styles.css
     toc: true
 

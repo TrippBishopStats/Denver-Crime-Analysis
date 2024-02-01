@@ -1,0 +1,17 @@
+---
+title: "Data Preparation"
+author: "Tripp Bishop"
+---
+
+
+```{r setup}
+#| message: false
+library(tidyverse)
+
+df_2010 <- read_csv("data/crime2010.csv")
+glimpse(df_2010)
+```
+```{r}
+df_2010 |> head(10)
+```
+
