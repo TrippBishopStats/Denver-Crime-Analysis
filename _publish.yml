@@ -1,0 +1,4 @@
+- source: project
+  quarto-pub:
+    - id: b237369e-82c4-4dba-9d96-4c9dfa08fb8e
+      url: 'https://trippbishop.quarto.pub/denver-crime-analysis'
