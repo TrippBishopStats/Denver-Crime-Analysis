@@ -43,13 +43,13 @@ ALTER TABLE crime_2021
 ALTER COLUMN geo_lat TYPE DECIMAL USING geo_lat::numeric;
 
 ALTER TABLE crime_2021 
-ALTER COLUMN first_occurrence_date TYPE DATE USING first_occurrence_date::date;
+ALTER COLUMN first_occurrence_date TYPE TIMESTAMP USING first_occurrence_date::timestamp;
 
 ALTER TABLE crime_2021 
-ALTER COLUMN last_occurrence_date TYPE DATE USING last_occurrence_date::date;
+ALTER COLUMN last_occurrence_date TYPE TIMESTAMP USING last_occurrence_date::timestamp;
 
 ALTER TABLE crime_2021 
-ALTER COLUMN reported_date TYPE DATE USING reported_date::date;
+ALTER COLUMN reported_date TYPE TIMESTAMP USING reported_date::timestamp;
 
 -- confirm the table changes took effect.
 SELECT 
