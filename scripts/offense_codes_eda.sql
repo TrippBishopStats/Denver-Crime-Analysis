@@ -83,9 +83,6 @@ ORDER BY tc.table_schema,
 -- primary key is in place. Now drop the unneed column object_id.
 ALTER TABLE offense_codes DROP COLUMN object_id;
 
--- confirm the columns are dropped.
-SELECT test_func();
-
 SELECT 
   column_name, 
   data_type, 
