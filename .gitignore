@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Renviron
+.Ruserdata
+
+/.quarto/
+/_site/
+/test_scripts/
