@@ -1,0 +1,223 @@
+---
+title: "Robbery Hotspots"
+---
+
+```{r setup}
+#| message: false
+#| echo: false
+
+rm(list=ls())
+library(tidyverse)
+library(sf)
+library(sfhotspot)
+library(ggspatial)
+library(osmdata)
+
+page_theme <- theme_void() +
+  theme(
+    panel.border = element_rect(colour = "black", fill = NA),
+    plot.caption = element_text(colour = "grey40", hjust = 0),
+    plot.subtitle = element_text(margin = margin(t = 6, b = 6)),
+    plot.title = element_text(colour = "grey50", face = "bold", size = 16)
+  )
+
+theme_set(page_theme)
+
+disclaimer <- str_glue(
+  "Contains data from OpenStreetMap",
+  "Robbery data: Open Data Catalog",
+  .sep = "\n"
+)
+
+# read in the data from intermediates directory
+df_robbery <- read_rds("intermediates/robbery.rds")
+
+transform_filter <- function(data,bbox) {
+  data |> 
+    filter(c_year == 2021 & 
+           between(geo_x, bbox["xmin"], bbox["xmax"]) & 
+           between(geo_y, bbox["ymin"], bbox["ymax"])) |> 
+    st_as_sf(coords = c("geo_x", "geo_y"),
+             crs = "EPSG:2232")
+}
+```
+
+
+```{r generate neighbourhood sf objects}
+nbhds <- st_read("geometry/Denver-Statistical-Neighborhoods.geojson", quiet = TRUE) |> 
+  st_transform("EPSG:2232")
+
+nbhd_bbox <- st_bbox(nbhds)
+```
+
+```{r create simple features objects for the robbery data}
+#| warning: false
+
+# We are only looking at 2021 data
+df_robbery_sf <- transform_filter(df_robbery, nbhd_bbox)
+
+# generate the kernel density grid
+df_robbery_kde <- df_robbery_sf |> 
+  # Calculate density
+  hotspot_kde(bandwidth_adjust = 0.5, quiet = TRUE) |> 
+  # Clip the density layer to the area for which we have data
+  st_intersection(nbhds)
+```
+
+
+
+
+```{r initial 2021 robbery dentist map}
+#| fig-width: 10
+#| fig-height: 8
+
+ggplot() + 
+  # Use openstreet map for a background map.
+  annotation_map_tile(type = "cartolight", zoomin = 0, progress = "none") +
+  geom_sf(
+    aes(fill = kde), 
+    data = df_robbery_kde, 
+    alpha = 0.75, 
+    colour = NA
+  ) +
+  scale_fill_distiller(
+    palette = "YlOrBr",
+    direction=1, 
+    breaks = range(pull(df_robbery_kde, kde)), 
+    labels = c("lower", "higher")
+  ) +
+  geom_sf(data=nbhds, colour="grey50", fill=NA) +
+  annotation_scale(style="ticks", location="br", unit_category="imperial") +
+  labs(
+    title = "Density of robberies in Denver, 2021",
+    subtitle = "Robberies are concentrated in the downtown area, but east Denver has a concentration",
+    fill = "Robbery\ndensity 2021",
+    caption = disclaimer
+  )
+```
+
+
+
+```{r get focused neighborhood data}
+#| warning: false
+
+nbhds_focused <- nbhds |> 
+   filter(nbhd_name %in% c(
+     "South Park Hill", "East Colfax", "Lowry Field", "Montclair", 
+     "Northeast Park Hill", "North Park Hill", "Stapleton"))
+
+nbhd_bbox <- st_bbox(nbhds_focused)
+
+df_robbery_focused_sf <- transform_filter(df_robbery, nbhd_bbox)
+
+# generate the kernel density grid
+df_robbery_focused_kde <- df_robbery_focused_sf |> 
+  st_intersection(nbhds_focused) |> 
+  # Calculate density
+  hotspot_kde(
+    grid = hotspot_grid(nbhds_focused, cell_size = 100),
+    bandwidth_adjust = 0.5, quiet = TRUE
+  ) |> 
+  # Clip the density layer to the area for which we have data
+  st_intersection(nbhds_focused)
+```
+
+
+
+
+
+```{r get OSM bus stop data}
+#| warning: false
+
+bus_stops <- nbhds_focused |> 
+  st_transform("WGS84") |> 
+  st_bbox() |> 
+  opq() |> 
+  # Define the features we want
+  add_osm_feature(key = "highway", value = "bus_stop") |> 
+  # Download those features for that area
+  osmdata_sf()
+
+# Extract bus stop locations as points
+bus_stop_points <- bind_rows(
+  pluck(bus_stops, "osm_points"), 
+  st_centroid(pluck(bus_stops, "osm_polygons"))
+) |> 
+  st_intersection(nbhds_focused |> st_transform("WGS84")) |> 
+  st_transform("EPSG:2232")
+```
+
+
+```{r map bus stops over density map}
+#| fig-width: 10
+#| fig-height: 8
+#| message: false
+
+ggplot() +
+  annotation_map_tile(type = "cartolight", zoomin = 0, progress = "none") +
+  geom_sf(aes(fill=kde), data = df_robbery_focused_kde, alpha=0.75, colour = NA) +
+  scale_fill_distiller(
+    palette = "YlOrBr",
+    direction=1, 
+    breaks = range(pull(df_robbery_focused_kde, kde)), 
+    labels = c("lower", "higher")
+  ) + 
+  geom_sf(data = nbhds_focused, colour = "grey40", fill = NA) +
+  geom_sf(data = bus_stop_points, colour = "darkred") +
+  labs(
+    title = "Density of robberies in east Denver, 2021",
+    subtitle = "Bus stops along East Colfax Avenue are at particularly high risk",
+    caption = disclaimer,
+    fill = "Robbery\ndensity 2021"
+  ) +
+  fixed_plot_aspect()
+```
+
+
+
+```{r gi star hotspot map}
+#| warning: false
+
+# generate the kernel density grid
+df_robbery_focused_gistar <- df_robbery_focused_sf |> 
+  st_intersection(nbhds_focused) |> 
+  # Calculate density
+  hotspot_gistar( 
+    grid = hotspot_grid(nbhds_focused, cell_size = 500),
+    quiet = TRUE
+  ) |> 
+  # Clip the density layer to the area for which we have data
+  st_intersection(nbhds_focused)
+```
+
+
+```{r map robbery hotspots}
+#| fig-width: 10
+#| fig-height: 8
+
+ggplot() +
+  annotation_map_tile(type = "cartolight", zoomin = 0, progress = "none") +
+  geom_sf(
+    aes(fill = kde),
+    data = filter(df_robbery_focused_gistar, gistar > 0, pvalue < 0.05), 
+    alpha = 0.75,
+    colour = NA
+  ) +
+  geom_sf(data = nbhds_focused, colour = "grey40", fill = NA) +
+  geom_sf(data = bus_stop_points, colour = "darkred") +
+  scale_fill_distiller(
+    palette = "YlOrBr",
+    direction = 1,
+    breaks = range(pull(df_robbery_focused_gistar, kde)), 
+    labels = c("lower", "higher")
+  ) + 
+  fixed_plot_aspect() +
+  labs(
+    title = "East Denver robbery hotspots",
+    subtitle = "Hotspots indicate areas where more robbies occur than expected by chance",
+    fill = str_wrap("Density of robberies at significant hotspots, 2021", 15),
+    caption = disclaimer
+  )
+```
+
+
