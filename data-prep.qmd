@@ -1,17 +1,189 @@
 ---
 title: "Data Preparation"
-author: "Tripp Bishop"
+code-fold: false
 ---
 
+## Preparing the database
+The majority of the data preparation for this analysis was done using SQL scripts. The process can be broken down into 5 steps: initial data import, year by year cleanup, creating master data table, creating views, creating a cleanup stored procedure to automate that process.
+
+### Initial data import
+
+The initial data import consisted of creating tables for each year's data and then loading data from comma separated values (CSV) files into the respective tables. The offense codes were loaded into a separate table to be joined with the crime data when necessary.
+
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/create_tables.sql" target="_blank">Create tables and import data</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/offense_codes_eda.sql" target="_blank">Offense codes</a>
+
+### Year by year cleanup
+Each year of data was initially stored in its own table in the database. It was then inspected to ensure that the data was as complete and coherent as possible. The clean-up scripts can be viewed on github from the links below.
+
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2010_cleanup.sql" target="_blank">2010 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2011_cleanup.sql" target="_blank">2011 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2012_cleanup.sql" target="_blank">2012 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2013_cleanup.sql" target="_blank">2013 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2014_cleanup.sql" target="_blank">2014 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2015_cleanup.sql" target="_blank">2015 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2016_cleanup.sql" target="_blank">2016 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2017_cleanup.sql" target="_blank">2017 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2018_cleanup.sql" target="_blank">2018 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2019_cleanup.sql" target="_blank">2019 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2020_cleanup.sql" target="_blank">2020 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2021_cleanup.sql" target="_blank">2021 data clean up</a>
+- <a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/crime_2022_cleanup.sql" target="_blank">2022 data clean up</a>
+
+### The master data table
+
+After the clean-up process was completed, the data where copied into a single table, `crimes` and the original yearly tables were dropped.
+
+<a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/create_crime_table.sql" target="_blank">Create master table script</a>
+
+### Creating views
+
+For convenience, SQL views were created to supply aggregate data. 
+
+<a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/create_views.sql" target="_blank">Create views</a>
+
+### Automation with stored procedure
+
+In order to make the data preparation process repeatable and reproducible, all of the cleaning and processing steps were placed into a stored procedure that cn be run from the PostgreSQL admin application.
+
+<a href="https://github.com/TrippBishopStats/Denver-Crime-Analysis/blob/main/scripts/create_cleaning_sproc.sql" target="_blank">Data cleaning procedure</a>
+
+## Creating datasets for analysis
 
 ```{r setup}
 #| message: false
-library(tidyverse)
+#| echo: false
 
-df_2010 <- read_csv("data/crime2010.csv")
-glimpse(df_2010)
+# clear out the environment
+rm(list=ls())
+
+# load necessary libraries and scripts
+library(tidyverse)
+source("R_scripts/db_conn.R")
 ```
-```{r}
-df_2010 |> head(10)
+
+Create 5 datasets, one for each of the crime types of interest:
+
+* Burglary of a residence with forced entry
+* Burglary of a business with forced entry
+* Theft of parts from a vehicle
+* Theft of a vehicle
+* Robberies that fall under the following offence codes:
+  * 1204 - Robbery of a person in the open using a gun
+  * 1205 - Robbery of a person in the open
+  * 1206 - Robbery of a person in the open using bodily force
+  * 1210 - Forcible purse snatching
+  * 1212 - Carjacking, armed
+
+### Offense codes
+
+The offense codes are critical to understanding the crime data. They categorize crimes stored in the `crimes` table, allowing for the 5 crime datasets listed above to be created. 
+```{r glimpse offense codes}
+df_offense_codes <- db_make_query(
+  "SELECT
+    *
+  FROM
+    offense_codes;"
+)
+glimpse(df_offense_codes)
 ```
+
+
+### Residential Burglary Dataset
+
+This dataset contains residential burglary data for 2010-2021.
+
+```{r create burglary residential dataset}
+# create the datasets
+df_burglary_res <- db_make_query(
+  "SELECT
+    *
+  FROM
+    crimes
+  WHERE
+    offense_code = '2204' AND
+    offense_code_extension = 0;"
+)
+glimpse(df_burglary_res)
+```
+### Business Burglary Dataset
+
+This dataset contains business burglary data for 2010-2021.
+
+```{r create business burglary dataset}
+df_burglary_biz <- db_make_query(
+  "SELECT
+    *
+  FROM
+    crimes
+  WHERE
+    offense_code = '2203' AND
+    offense_code_extension = 0;"
+)
+glimpse(df_burglary_biz)
+```
+
+### Theft of Parts from a Vehicle Dataset
+
+This dataset contains theft of parts from a vehicle data for 2010-2021.
+
+```{r create theft of parts from a vehicle dataset}
+df_theft_parts <- db_make_query(
+  "SELECT
+    *
+  FROM
+    crimes
+  WHERE
+    offense_code = '2304' AND
+    offense_code_extension = 0;"
+)
+
+glimpse(df_theft_parts)
+```
+
+
+### Theft of a Vehicle Dataset
+
+This dataset contains vehicle theft data for 2010-2021.
+
+```{r create theft of a vehicle dataset}
+df_theft_autos <- db_make_query(
+  "SELECT
+    *
+  FROM
+    crimes
+  WHERE
+    offense_code = '2404' AND
+    offense_code_extension = 0;"
+)
+glimpse(df_theft_autos)
+```
+
+### Robberies Dataset
+
+This dataset contains robbery data for 2010-2021. The criteria for robbery are listed at the beginning of this section.
+
+```{r create robberies dataset}
+df_robbery <- db_make_query(
+  "SELECT
+    *
+  FROM
+    crimes
+  WHERE
+    offense_code IN ('1204', '1205', '1206', '1210', '1212') AND
+    offense_code_extension = 0;"
+)
+glimpse(df_robbery)
+```
+
+```{r write out intermediate RDS files}
+#| echo: false
+write_rds(df_burglary_biz, "intermediates/burglary_biz.rds")
+write_rds(df_burglary_res, "intermediates/burglary_res.rds")
+write_rds(df_theft_parts, "intermediates/theft_parts.rds")
+write_rds(df_theft_autos, "intermediates/theft_autos.rds")
+write_rds(df_robbery, "intermediates/robbery.rds")
+```
+
+
 
