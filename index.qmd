@@ -1,11 +1,33 @@
 ---
-title: "Denver Crime Analysis"
+title: "Home"
+code-tools: false
 ---
 
-This is a Quarto website.
+## Overview
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
 
-```{r}
-1 + 1
-```
+## Objectives
+
+
+:::{.callout-note}
+## Viewing the code
+To view the code used in this analysis, click the `> Code` accordions to expand the code blocks. The `</>Code` dropdowns at the top of every page will let you view the entire quarto markdown file used to create the page.
+:::
+
+
+## Data sources
+
+The data for this project came from these sources:
+
+- <a href="https://data.colorado.gov/Municipal/Denver-Statistical-Neighborhoods/6g4b-w8bd" target="_blank">Denver Statistical Neighborhoods<a>
+- <a href="https://www.denvergov.org/opendata/dataset/city-and-county-of-denver-crime" target="_blank">Open Data Catalog<a>
+- <a href="https://www.denvergov.org/media/gis/DataCatalog/crime/pdf/NIBRS_Crime_Types.pdf" target="_blank">NIBRS Crime Type Definitions<a>
+- <a href="https://data.colorado.gov/Demographics/Census-Tracts-in-Colorado-2020/7t53-5gfx/about_data" target="_blank">Census Tracts in Colorado 2020<a>
+- <a href="https://wiki.openstreetmap.org/wiki/Key:highway" target="_blank">OpenStreetMap<a>
+
+## References
+
+The following resources were used for background information and context in spatial data analysis and crime mapping.
+
+- <a href="https://r-spatial.org/book/" target="_blank">Spatial Data Science<a>
+- <a href="http://books.lesscrime.info/learncrimemapping/" target="_blank">Learn Crime Mapping<a>
