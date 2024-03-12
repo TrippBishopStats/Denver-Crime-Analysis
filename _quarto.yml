@@ -2,19 +2,37 @@ project:
   type: website
 
 website:
-  title: "Denver Crime Analysis: 2010-2021"
+  title: "Denver Crime Analysis"
   navbar:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
-      - data-prep.qmd
+      - href: data-prep.qmd
+        text: Preparation
+      - href: robbery-hotspots.qmd
+        text: Hotspots
+      - href: ecological-fallacy.qmd
+        text: Ecological Fallacy
+    tools:
+    - icon: linkedin
+      href: https://www.linkedin.com/in/tripp-bishop-65510a3/
+    - icon: github
+      href: https://github.com/TrippBishopStats/Denver-Crime-Analysis
 
 format:
   html:
-    theme: cyborg
-    css: styles.css
+    theme: zephyr
     toc: true
+    code-fold: true
+    code-line-numbers: true
+    code-tools: true
 
-editor: visual
+editor: source
 
+# menu:
+#           - href: robbery-hotspots.qmd
+#             text: Robbery hotspots
+#           - href: where-crime-is-occurring.qmd
+#             text: Where crime is occurring
+#           - href: when-crime-is-occurring.qmd
+#             text: When crime is occurring
