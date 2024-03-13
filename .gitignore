@@ -12,3 +12,6 @@ predicting-the-future.qmd
 /intermediates/
 when-crime-is-occurring.qmd
 where-crime-is-occurring.qmd
+/geometry/police_*
+/R_scripts/basic-map.R
+/data/Census*
