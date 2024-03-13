@@ -4,16 +4,16 @@ code-tools: false
 ---
 
 ## Overview
-
-
-## Objectives
-
+This analysis looks at crime data for Denver, Colorado from 2010 to 2021. A number of analyses will be done, each focusing on a different type of crime in a particular time and part of the city. In each analysis observations of crime patterns will be reported and recommendations, if relevant, will be made in the conclusions section. In an effort to create reproducible research, each page is a self contained analysis and the R code is available embedded in each page for quick reference but also available on Github.
 
 :::{.callout-note}
 ## Viewing the code
-To view the code used in this analysis, click the `> Code` accordions to expand the code blocks. The `</>Code` dropdowns at the top of every page will let you view the entire quarto markdown file used to create the page.
+To view the code used in this analysis, click the `> Code` accordions to expand the code blocks. The `</>Code` dropdowns at the top of every page will let you view the entire quarto markdown file used to create the page. All data and code is available for viewing and download on [Github](https://github.com/TrippBishopStats/Denver-Crime-Analysis).
 :::
 
+## Analyses
+
+- [Robbery hot spots in east Denver, 2021](robbery-hotspots.html)
 
 ## Data sources
 
