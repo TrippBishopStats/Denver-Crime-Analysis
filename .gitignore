@@ -8,3 +8,7 @@
 /_site/
 /test_scripts/
 /rosm.cache
+predicting-the-future.qmd
+/intermediates/
+when-crime-is-occurring.qmd
+where-crime-is-occurring.qmd
