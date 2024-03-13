@@ -1,6 +1,5 @@
 project:
   type: website
-
 website:
   title: "Denver Crime Analysis"
   navbar:
@@ -14,11 +13,12 @@ website:
       - href: ecological-fallacy.qmd
         text: Ecological Fallacy
     tools:
+    - icon: house
+      href: https://trippbishop.quarto.pub
     - icon: linkedin
       href: https://www.linkedin.com/in/tripp-bishop-65510a3/
     - icon: github
       href: https://github.com/TrippBishopStats/Denver-Crime-Analysis
-
 format:
   html:
     theme: zephyr
@@ -26,7 +26,6 @@ format:
     code-fold: true
     code-line-numbers: true
     code-tools: true
-
 editor: source
 
 # menu:
