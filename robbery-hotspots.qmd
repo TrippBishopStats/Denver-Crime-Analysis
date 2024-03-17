@@ -166,7 +166,7 @@ The density map shown below indicates a few important points. First, most robber
 
 label_size <- 3.5
 
-label_points <- read_csv("label_points.csv") |> 
+label_points <- read_csv("geometry/label_points.csv") |> 
   st_as_sf(coords = c("x", "y"),
              crs = "EPSG:2232")
   
@@ -217,7 +217,7 @@ df_robbery_focused_gistar <- df_robbery_focused_sf |>
   st_intersection(nbhds_focused)
 ```
 
-The *Gi\** statistics computed by the `hotspot_gistar` function from the **sfhotspot** package provides a *p*-value in addition to the value of the statistic. We will filter the results to include only cells that are significant at a significance level of $\alpha = 0.5$ and that have positive values. Negative values indicate areas that have fewer robberies than would be expected by chance.
+The *Gi\** statistics computed by the `hotspot_gistar` function from the **sfhotspot** package provides a *p*-value in addition to the value of the statistic. We will filter the results to include only cells that are significant at a significance level of $\alpha = 0.05$ and that have positive values. Negative values indicate areas that have fewer robberies than would be expected by chance.
 
 The hot spot map below shows the areas with statistically significant number of robberies. They broadly correspond to the density map shown earlier. East Colfax Avenue is, as expected, the epicenter for robberies in east Denver. One notable departure is that the area in north `Stapleton` along E 56th Avenue is not a statistical hot spot. The hot spot along Quebec Street is in close proximity to bus stops on its southern edge. Planners way wish to allocate robbery prevention measures at these bus stops.
 
